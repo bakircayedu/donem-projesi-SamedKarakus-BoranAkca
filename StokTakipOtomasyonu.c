@@ -49,7 +49,8 @@ int main(){
 
     printf("Urun Satis Fiyati: ");
     scanf("%f", &urun1.urunSatisFiyati);
-
+    
+    //DENEME ALANI
     printf("\n\n- Girilen urun bilgileri -\n\nUrun Adi: %s\nKategori: %s\nKod: %d\nMiktar: %d adet\nUrun Satis Fiyati: %.2f TL", urun1.urunAdi, urun1.kategori, urun1.urunKodu, urun1.stokMiktari, urun1.urunSatisFiyati);
 
     /*urunStokGirisi stok1 = {1235, 852, 15, 12};
