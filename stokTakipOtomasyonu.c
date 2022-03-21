@@ -11,6 +11,7 @@
 #define bilgiGirisMetni "Lutfen sistemin sizden istedigi bilgileri sirasiyla giriniz.\n"
 
 int urunVeriSecenegi, tedarikciVeriSecenegi, urunStokVeriSecenegi;
+FILE *urunVeriDosyasi, *tedarikciVeriDosyasi, *urunStokVeriDosyasi;
 
 enum genelSistemselSecenek{
     urunVerileri = 1, tedarikciVerileri, urunStokVerileri
@@ -57,12 +58,15 @@ tedarikci girilenTedarikciBilgileri;
 urunStok girilenUrunStokBilgileri;
 
 void sistemSecenegi(int sistemGirdisi);
-void urunBilgiGirisi(char x[20], char y[20], int z, int k, float i);
+//void urunBilgiGirisi(char x[20], char y[20], int z, int k, float i);
+void urunBilgiGirisi(FILE *urunVeriDosyasi);
 void urunBilgileri (int girdi);
 void tedarikciBilgileri(int tedarikciGirdi);
-void tedarikciBilgiGirisi(int x, char y[20], char z[100], char a[30]);
+//void tedarikciBilgiGirisi(int x, char y[20], char z[100], char a[30]);
+void tedarikciBilgiGirisi(FILE *tedarikciVeriDosyasi);
 void urunStokBilgileri(int urunStokGirdi);
-void urunStokBilgiGirisi(int x, int y, int z, float a, int b);
+//void urunStokBilgiGirisi(int x, int y, int z, float a, int b);
+void urunStokBilgiGirisi(FILE *urunStokVeriDosyasi);
 
 int main(){
     int baslangicSecenegi;
@@ -70,9 +74,6 @@ int main(){
     scanf("%d", &baslangicSecenegi);
 
     sistemSecenegi(baslangicSecenegi);
-
-
-    //urunBilgileri(baslangicSecenegi);
 
     return 0;
 }
@@ -88,12 +89,12 @@ void sistemSecenegi(int sistemGirdisi){
         case tedarikciVerileri:
             printf("\n%s\n", tedarikciVeriSecmeMetni);
             scanf("%d", &tedarikciVeriSecenegi);
-            //urunBilgileri(tedarikciVeriSecenegi);
+            tedarikciBilgileri(tedarikciVeriSecenegi);
             break;
         case urunStokVerileri:
             printf("\n%s\n", urunStokVeriSecmeMetni);
             scanf("%d", &urunStokVeriSecenegi);
-            //urunBilgileri(urunStokVeriSecenegi);
+            urunStokBilgileri(urunStokVeriSecenegi);
             break;
         default:
             printf("Lutfen gecerli degisken giriniz.");
@@ -107,7 +108,8 @@ void urunBilgileri (int urunGirdi){
     switch (urunGirdi){
     case urunEkleme:
         printf("\n%s\n", bilgiGirisMetni);
-        urunBilgiGirisi(girilenUrunBilgileri.urunAdi, girilenUrunBilgileri.kategori, girilenUrunBilgileri.urunKodu, girilenUrunBilgileri.stokMiktari, girilenUrunBilgileri.urunSatisFiyati);
+        urunBilgiGirisi(urunVeriDosyasi);
+        //urunBilgiGirisi(girilenUrunBilgileri.urunAdi, girilenUrunBilgileri.kategori, girilenUrunBilgileri.urunKodu, girilenUrunBilgileri.stokMiktari, girilenUrunBilgileri.urunSatisFiyati);
         break;
     //case urunGuncelleme:
 
@@ -117,21 +119,29 @@ void urunBilgileri (int urunGirdi){
     }
 }
 
-void urunBilgiGirisi(char x[20], char y[20], int z, int k, float i){
-    printf("Urun adi: ");
-    gets(x);
+void urunBilgiGirisi(FILE *urunVeriDosyasi){
+    char urunAdi[20], kategori[20];
+    int urunKodu, miktar, urunSatisFiyati;
+    urunVeriDosyasi = fopen("urunVeriDosyasi.txt", "a+");
+    for(int i = 0; i < 1; i++){
+        printf("Urun adi: ");
+        scanf("%s", urunAdi);
 
-    printf("Kategori: ");
-    gets(y);
-    
-    printf("Urun Kodu: ");
-    scanf("%d", &z);
+        printf("Kategori: ");
+        scanf("%s", kategori);
 
-    printf("Miktar: ");
-    scanf("%d", &k);
+        printf("Urun Kodu: ");
+        scanf("%d", &urunKodu);
 
-    printf("Urun Satis Fiyati: ");
-    scanf("%f", &i);
+        printf("Miktar: ");
+        scanf("%d", &miktar);
+
+        printf("Urun Satis Fiyati: ");
+        scanf("%f", &urunSatisFiyati);
+
+        fprintf(urunVeriDosyasi, "%s %s %d %d %.2f\n", urunAdi, kategori, urunKodu, miktar, urunSatisFiyati);
+    }
+    fclose(urunVeriDosyasi);
 }
 ///////////////////////////////////////////////
 
@@ -140,7 +150,8 @@ void tedarikciBilgileri(int tedarikciGirdi){
     switch(tedarikciGirdi){
         case tedarikciEkleme:
         printf("\n%s\n", bilgiGirisMetni);
-        tedarikciBilgiGirisi(girilenTedarikciBilgileri.tedarikciNo, girilenTedarikciBilgileri.tedarikciAdi, girilenTedarikciBilgileri.adres, girilenTedarikciBilgileri.sehir);
+        tedarikciBilgiGirisi(tedarikciVeriDosyasi);
+        //tedarikciBilgiGirisi(girilenTedarikciBilgileri.tedarikciNo, girilenTedarikciBilgileri.tedarikciAdi, girilenTedarikciBilgileri.adres, girilenTedarikciBilgileri.sehir);
         break;
         //case tedarikciGuncelleme:
 
@@ -150,18 +161,26 @@ void tedarikciBilgileri(int tedarikciGirdi){
     }
 }
 
-void tedarikciBilgiGirisi(int x, char y[20], char z[100], char a[30]){
-    printf("Tedarikci No: ");
-    scanf("%d", &x);
+void tedarikciBilgiGirisi(FILE *tedarikciVeriDosyasi){
+    int tedarikciNo;
+    char tedarikciAdi[20], adres[50], sehir[20];
+    tedarikciVeriDosyasi = fopen("tedarikciVeriDosyasi.txt", "a+");
+    for(int i = 0; i < 1; i++){
+        printf("Tedarikci No: ");
+        scanf("%d", &tedarikciNo);
 
-    printf("Tedarikci Adi: ");
-    gets(y);
-    
-    printf("Adres: ");
-    gets(z);
+        printf("Tedarikci Adi: ");
+        scanf("%s", tedarikciAdi);
+        
+        printf("Adres: ");
+        scanf("%s", adres); //BOŞLUKLU ADRES YAZINCA KAYMA OLUYOR.
+        
+        printf("Sehir: ");
+        scanf("%s", sehir);
 
-    printf("Sehir: ");
-    gets(a);   
+        fprintf(tedarikciVeriDosyasi, "%d %s %s %s\n", tedarikciNo, tedarikciAdi, adres, sehir);
+    }
+    fclose(tedarikciVeriDosyasi);
 }
 /////////////////////////////////////////////////
 
@@ -170,7 +189,8 @@ void urunStokBilgileri(int urunStokGirdi){
     switch(urunStokGirdi){
         case urunStokEkleme:
             printf("\n%s\n", bilgiGirisMetni);
-            urunStokBilgiGirisi(girilenUrunStokBilgileri.tedarikciNo, girilenUrunStokBilgileri.urunKodu, girilenUrunStokBilgileri.alisMiktari, girilenUrunStokBilgileri.alisFiyati, girilenUrunStokBilgileri.tarih);
+            urunStokBilgiGirisi(urunStokVeriDosyasi);
+            //urunStokBilgiGirisi(girilenUrunStokBilgileri.tedarikciNo, girilenUrunStokBilgileri.urunKodu, girilenUrunStokBilgileri.alisMiktari, girilenUrunStokBilgileri.alisFiyati, girilenUrunStokBilgileri.tarih);
             break;
         //case urunStokGuncelleme:
 
@@ -180,21 +200,30 @@ void urunStokBilgileri(int urunStokGirdi){
     }
 }
 
-void urunStokBilgiGirisi(int x, int y, int z, float a, int b){
-    printf("Tedarikci No: ");
-    scanf("%d", &x);
+void urunStokBilgiGirisi(FILE *urunStokVeriDosyasi){
+    int tedarikciNo, urunKodu, alisMiktari, tarih;
+    float alisFiyati;
+    urunStokVeriDosyasi = fopen("urunStokVeriDosyasi.txt", "a+");
 
-    printf("Urun Kodu: ");
-    scanf("%d", &y);
-    
-    printf("Alis Miktari: ");
-    scanf("%d", &z);
+    for(int i = 0; i < 1; i++){
+        printf("Tedarikci No: ");
+        scanf("%d", &tedarikciNo);
 
-    printf("Alis Fiyati: ");
-    scanf("%f", &a);
+        printf("Urun Kodu: ");
+        scanf("%d", &urunKodu);
+        
+        printf("Alis Miktari: ");
+        scanf("%d", &alisMiktari);
 
-    printf("Tarih: ");
-    scanf("%d", &b);
+        printf("Alis Fiyati: ");
+        scanf("%f", &alisFiyati);
+
+        printf("Tarih: ");
+        scanf("%d", &tarih);
+
+        fprintf(urunStokVeriDosyasi, "%d %d %d %d %d", tedarikciNo, urunKodu, alisMiktari, alisFiyati, tarih);
+    }
+    fclose(urunStokVeriDosyasi);
 }
 
 /////////////////////////////////////////////////
