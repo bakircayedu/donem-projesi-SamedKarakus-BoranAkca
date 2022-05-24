@@ -11,9 +11,10 @@
 #define DEVAM "Devam etmek icin tiklayiniz."
 #define bilgiGirisMetni "Lutfen sistemin sizden istedigi bilgileri sirasiyla giriniz.\n"
 #define guncellemeMetni "\nListelenen hangi secenegi guncellemek istiyorsunuz? (Lutfen kayit numarasini giriniz)\n\n"
-#define silmeMetni "\nListelenen silmek istediginiz urun ismini giriniz: \n\n"
-#define aramaMetni "Lutfen aradiginiz urunu giriniz: "
+#define silmeMetni "\nListeden silmek istediginiz veriyi giriniz: (Lutfen kayit numarasini giriniz)\n\n"
+#define aramaMetni "Lutfen aradiginiz veriyi giriniz: "
 #define MAX 256
+#define veriGirisiOnayi "\nVeri girisi basariyla tamamlanmistir."
 
 int urunVeriSecenegi, tedarikciVeriSecenegi, urunStokVeriSecenegi;
 FILE *urunVeriGirisiDosyasi, *tedarikciVeriGirisiDosyasi, *urunStokVeriGirisiDosyasi;
@@ -115,22 +116,21 @@ void sistemSecenegi(int sistemGirdisi){
     }
 }
 
-///////////////////////ÜRÜN İLE İLGİLİ FONKSİYONLAR
 void urunBilgileri (int urunGirdi){
     switch (urunGirdi){
         case urunEkleme:
             printf("\n%s\n", bilgiGirisMetni);
             urunBilgiGirisi(urunVeriGirisiDosyasi);
+            printf("%s", veriGirisiOnayi);
             break;
         case urunGuncelleme:
             urunBilgiGuncelleme(urunVeriGirisiDosyasi);
             break;
         case urunSilme:
-            printf("%s", silmeMetni);
             urunBilgiSilme(urunVeriGirisiDosyasi);
             break;
         case urunArama:
-            printf("%s", aramaMetni);
+            printf("Lutfen aramak istediginiz veriyi urun adi girerek belirtiniz: ");
             urunBilgiArama(urunVeriGirisiDosyasi);
             break;
         default:
@@ -184,7 +184,7 @@ void urunBilgiArama(FILE *urunVeriGirisiDosyasi){
         fscanf(urunVeriGirisiDosyasi, "%s %s %d %d %f", urunAdi, kategori, &urunKodu, &miktar, &urunSatisFiyati);
 
         if (strcmp(arananUrun, urunAdi) == 0){
-            printf("Aranan urun bulundu.\n\n");
+            printf("Aranan veri bulundu.\n\n");
             printf("%d. Kayit\n", i+1);
             printf("---------\n");
             printf("Urun adi: %s\n", urunAdi);
@@ -196,14 +196,14 @@ void urunBilgiArama(FILE *urunVeriGirisiDosyasi){
         }
     }
     if (strcmp(arananUrun, urunAdi) == 1){
-        puts("Aranan urun bulunamadi.");
+        puts("Aranan veri bulunamadi.");
         exit(EXIT_SUCCESS);
     }
 }
 
 void urunBilgiSilme(FILE *urunVeriGirisiDosyasi){
     FILE *urunGeciciDosyasi;
-    char urunAdi[MAX], kategori[MAX], degisecekKelime[MAX], yeniKelime[MAX], okunanKelime[MAX];
+    char urunAdi[MAX], kategori[MAX];
     int urunKodu, miktar, siraSayisi = 0, silinecekKayit = 0;
     float urunSatisFiyati;
     char karakterSayaci;
@@ -233,7 +233,7 @@ void urunBilgiSilme(FILE *urunVeriGirisiDosyasi){
         printf("Urun Satis Fiyati: %f\n\n", urunSatisFiyati);
     }
 
-    puts("Kayitlar siralanmistir.\nSilmek istediginiz kayit numarasini yaziniz.\n");
+    printf("%s", silmeMetni);
     scanf("%d", &silinecekKayit);
 
     bool devamEt = true;
@@ -264,7 +264,7 @@ void urunBilgiGuncelleme(FILE *urunVeriGirisiDosyasi){
     char karakterSayaci;
 
     urunVeriGirisiDosyasi = fopen("urunVeriGirisiDosyasi.txt", "r");
-    urunGeciciDosyasi = fopen("urunGeciciDosyasisi.txt", "w");
+    urunGeciciDosyasi = fopen("urunGeciciDosyasi.txt", "w");
 
     dosyaVarligi(urunVeriGirisiDosyasi);
 
@@ -311,17 +311,22 @@ void urunBilgiGuncelleme(FILE *urunVeriGirisiDosyasi){
     rename("urunGeciciDosyasi.txt", "urunVeriGirisiDosyasi.txt");
 }
 
-
-///////////////////////TEDARİKÇİ İLE İLGİLİ FONKSİYONLAR
 void tedarikciBilgileri(int tedarikciGirdi){
     switch(tedarikciGirdi){
         case tedarikciEkleme:
             printf("\n%s\n", bilgiGirisMetni);
             tedarikciBilgiGirisi(tedarikciVeriGirisiDosyasi);
+            printf("%s", veriGirisiOnayi);
             break;
         case tedarikciGuncelleme:
-            printf("%s", guncellemeMetni);
             tedarikciBilgiGuncelleme(tedarikciVeriGirisiDosyasi);
+            break;
+        case tedarikciSilme:
+            tedarikciBilgiSilme(urunVeriGirisiDosyasi);
+            break;
+        case tedarikciArama:
+            printf("Lutfen aramak istediginiz veriyi tedarikci no girerek belirtiniz: ");
+            tedarikciBilgiArama(urunVeriGirisiDosyasi);
             break;
         default:
             printf("Lutfen gecerli degisken giriniz.");
@@ -329,17 +334,81 @@ void tedarikciBilgileri(int tedarikciGirdi){
     }
 }
 
-void tedarikciBilgiGuncelleme(FILE *tedarikciVeriGirisiDosyasi){
+void tedarikciBilgiGirisi(FILE *tedarikciVeriGirisiDosyasi){
     int tedarikciNo;
     char tedarikciAdi[MAX], adres[MAX], sehir[MAX];
+    tedarikciVeriGirisiDosyasi = fopen("tedarikciVeriGirisiDosyasi.txt", "a+");
+    dosyaVarligi(tedarikciVeriGirisiDosyasi);
+
+    for(int i = 0; i < 1; i++){
+        printf("Tedarikci No: ");
+        scanf("%d", &tedarikciNo);
+        printf("Tedarikci Adi: ");
+        scanf("%s", tedarikciAdi);
+        printf("Adres: ");
+        scanf("%s", adres);
+        printf("Sehir: ");
+        scanf("%s", sehir);
+        fprintf(tedarikciVeriGirisiDosyasi, "%d %s %s %s\n", tedarikciNo, tedarikciAdi, adres, sehir);
+    }
+    fclose(tedarikciVeriGirisiDosyasi);
+}
+
+void tedarikciBilgiArama(FILE *tedarikciVeriGirisiDosyasi){
+    char tedarikciAdi[MAX], adres[MAX], sehir[MAX], karakterSayaci;
+    int tedarikciNo, siraSayisi, arananTedarikciNo;
+
+    scanf("%d", &arananTedarikciNo);
+
     tedarikciVeriGirisiDosyasi = fopen("tedarikciVeriGirisiDosyasi.txt", "r");
 
-    if(urunVeriGirisiDosyasi == NULL){
-        printf("Dosya acilamadi.");
-        exit(1);
-    }
+    dosyaVarligi(tedarikciVeriGirisiDosyasi);
 
-    for(int i = 0; i < 2; i++){
+    while((karakterSayaci = fgetc(tedarikciVeriGirisiDosyasi)) != EOF){
+        if (karakterSayaci == '\n'){
+            siraSayisi++;
+        }
+    }
+    dosyaIcerikKontrolu(tedarikciVeriGirisiDosyasi);
+
+    for(int i = 0; i < siraSayisi; i++){
+        fscanf(tedarikciVeriGirisiDosyasi, "%d %s %s %s", &tedarikciNo, tedarikciAdi, adres, sehir);
+
+        if (tedarikciNo == arananTedarikciNo){
+            printf("Aranan veri bulundu.\n\n");
+            printf("%d. Kayit\n", i+1);
+            printf("---------\n");
+            printf("Tedarikci No: %d\n", tedarikciNo);
+            printf("Tedarikci Adi: %s\n", tedarikciAdi);
+            printf("Adres: %s\n", adres);
+            printf("Sehir: %s\n\n", sehir);
+            break;
+        }
+    }
+    if (tedarikciNo != arananTedarikciNo){
+        puts("Aranan veri bulunamadi.");
+        exit(EXIT_SUCCESS);
+    }
+}
+
+void tedarikciBilgiSilme(FILE *tedarikciVeriGirisiDosyasi){
+    FILE *tedarikciGeciciDosyasi;
+    char tedarikciAdi[MAX], adres[MAX], sehir[MAX], karakterSayaci, dosyalarArasiBaglanti[MAX];
+    int tedarikciNo, siraSayisi, silinecekKayitNo = 0;
+
+    tedarikciVeriGirisiDosyasi = fopen("tedarikciVeriGirisiDosyasi.txt", "r");
+    tedarikciGeciciDosyasi = fopen("tedarikciGeciciDosyasisi.txt", "w");
+
+    dosyaVarligi(tedarikciVeriGirisiDosyasi);
+
+    while((karakterSayaci = fgetc(tedarikciVeriGirisiDosyasi)) != EOF){
+        if (karakterSayaci == '\n'){
+            siraSayisi++;
+        }
+    }
+    dosyaIcerikKontrolu(tedarikciVeriGirisiDosyasi);
+
+    for(int i = 0; i < siraSayisi; i++){
         fscanf(tedarikciVeriGirisiDosyasi, "%d %s %s %s", &tedarikciNo, tedarikciAdi, adres, sehir);
         
         printf("%d. Kayit\n", i+1);
@@ -349,47 +418,97 @@ void tedarikciBilgiGuncelleme(FILE *tedarikciVeriGirisiDosyasi){
         printf("Adres: %s\n", adres);        
         printf("Sehir: %s\n\n", sehir);
     }
+
+    printf("%s", silmeMetni);
+    scanf("%d", &silinecekKayitNo);
+
+    bool devamEt = true;
+    int anlikSira = 1;
+    do{
+        fgets(dosyalarArasiBaglanti, MAX, tedarikciVeriGirisiDosyasi);
+        if(feof(tedarikciVeriGirisiDosyasi))
+            devamEt == false;
+        else if (anlikSira != silinecekKayitNo)
+            fputs(dosyalarArasiBaglanti, tedarikciGeciciDosyasi);
+        anlikSira++;
+    } while (devamEt);
+    
     fclose(tedarikciVeriGirisiDosyasi);
+    fclose(tedarikciGeciciDosyasi);
+
+    remove("tedarikciVeriGirisiDosyasi.txt");
+    rename("tedarikciGeciciDosyasi.txt", "tedarikciVeriGirisiDosyasi.txt");
 }
 
-void tedarikciBilgiGirisi(FILE *tedarikciVeriGirisiDosyasi){
-    int tedarikciNo;
-    char tedarikciAdi[MAX], adres[MAX], sehir[MAX];
-    tedarikciVeriGirisiDosyasi = fopen("tedarikciVeriGirisiDosyasi.txt", "a+");
+void tedarikciBilgiGuncelleme(FILE *tedarikciVeriGirisiDosyasi){
+    FILE *tedarikciGeciciDosyasi;
+    int tedarikciNo, siraSayisi;
+    char tedarikciAdi[MAX], adres[MAX], sehir[MAX], karakterSayaci, degisecekKelime[MAX], yeniKelime[MAX], okunanKelime[MAX];
 
-    if(urunVeriGirisiDosyasi == NULL){
-        printf("Dosya acilamadi.");
-        exit(1);
+    tedarikciVeriGirisiDosyasi = fopen("tedarikciVeriGirisiDosyasi.txt", "r");
+    tedarikciGeciciDosyasi = fopen("tedarikciGeciciDosyasisi.txt", "w");
+
+    dosyaVarligi(tedarikciVeriGirisiDosyasi);
+
+    while((karakterSayaci = fgetc(tedarikciVeriGirisiDosyasi)) != EOF){
+        if (karakterSayaci == '\n'){
+            siraSayisi++;
+        }
     }
+    dosyaIcerikKontrolu(tedarikciVeriGirisiDosyasi);
 
-    for(int i = 0; i < 1; i++){
-        printf("Tedarikci No: ");
-        scanf("%d", &tedarikciNo);
-
-        printf("Tedarikci Adi: ");
-        scanf("%s", tedarikciAdi);
+    for(int i = 0; i < siraSayisi; i++){
+        fscanf(tedarikciVeriGirisiDosyasi, "%d %s %s %s", &tedarikciNo, tedarikciAdi, adres, sehir);
         
-        printf("Adres: ");
-        gets(adres);
-
-        printf("Sehir: ");
-        scanf("%s", sehir);
-
-        fprintf(tedarikciVeriGirisiDosyasi, "%d %s %s %s\n", tedarikciNo, tedarikciAdi, adres, sehir);
+        printf("%d. Kayit\n", i+1);
+        printf("---------\n");
+        printf("Tedarikci No: %d\n", tedarikciNo);
+        printf("Tedarikci Adi: %s\n", tedarikciAdi);
+        printf("Adres: %s\n", adres);        
+        printf("Sehir: %s\n\n", sehir);
     }
+
+    puts("Kayitlar siralanmistir.\nGuncellemek istediginiz veriyi tedarikci adi belirterek yaziniz.\n");
+    scanf("%s", degisecekKelime);
+    degisecekKelime[strlen(degisecekKelime) - 1] = degisecekKelime[strlen(degisecekKelime)];
+
+    puts("\nYerini alacak veriyi yaziniz:\n");
+    scanf("%s", yeniKelime);
+    yeniKelime[strlen(yeniKelime) - 1] = yeniKelime[strlen(yeniKelime)];
+
+    rewind(tedarikciVeriGirisiDosyasi);
+    while(!feof(tedarikciVeriGirisiDosyasi)){
+        fscanf(tedarikciVeriGirisiDosyasi, "%s", okunanKelime);
+
+        if(strcmp(okunanKelime, degisecekKelime) == 0)
+            strcpy(okunanKelime, yeniKelime);
+        fprintf(tedarikciGeciciDosyasi, "%s", okunanKelime);
+    }
+
     fclose(tedarikciVeriGirisiDosyasi);
+    fclose(tedarikciGeciciDosyasi);
+
+    remove("tedarikciVeriGirisiDosyasi.txt");
+    rename("tedarikciGeciciDosyasi.txt", "tedarikciVeriGirisiDosyasi.txt");
+
 }
 
-/////////////////////////////ÜRÜN STOK İLE İLGİLİ FONKSİYONLAR
 void urunStokBilgileri(int urunStokGirdi){
     switch(urunStokGirdi){
         case urunStokEkleme:
             printf("\n%s\n", bilgiGirisMetni);
             urunStokBilgiGirisi(urunStokVeriGirisiDosyasi);
+            printf("%s", veriGirisiOnayi);
             break;
         case urunStokGuncelleme:
-            printf("%s", guncellemeMetni);
             urunStokBilgiGuncelleme(urunStokVeriGirisiDosyasi);
+            break;
+        case urunStokSilme:
+            urunStokBilgiSilme(urunStokVeriGirisiDosyasi);
+            break;
+        case urunStokArama:
+            printf("Lutfen aradiginiz verinin tedarikci no bilgisini giriniz: ");
+            urunStokBilgiArama(urunStokVeriGirisiDosyasi);
             break;
         default:
             printf("Lutfen gecerli degisken giriniz.");
@@ -401,54 +520,170 @@ void urunStokBilgiGirisi(FILE *urunStokVeriGirisiDosyasi){
     int tedarikciNo, urunKodu, alisMiktari, tarih;
     float alisFiyati;
     urunStokVeriGirisiDosyasi = fopen("urunStokVeriGirisiDosyasi.txt", "a+");
-
-    if(urunVeriGirisiDosyasi == NULL){
-        printf("Dosya acilamadi.");
-        exit(1);
-    }
+    dosyaVarligi(urunStokVeriGirisiDosyasi);
     
     for(int i = 0; i < 1; i++){
         printf("Tedarikci No: ");
-        scanf("%d", &girilenUrunStokBilgileri.tedarikciNo);
-
+        scanf("%d", &tedarikciNo);
         printf("Urun Kodu: ");
-        scanf("%d", &girilenUrunStokBilgileri.urunKodu);
-        
+        scanf("%d", &urunKodu);
         printf("Alis Miktari: ");
-        scanf("%d", &girilenUrunStokBilgileri.alisMiktari);
-
+        scanf("%d", &alisMiktari);
         printf("Alis Fiyati: ");
-        scanf("%f", &girilenUrunStokBilgileri.alisFiyati);
-
+        scanf("%f", &alisFiyati);
         printf("Tarih: ");
-        scanf("%d", &girilenUrunStokBilgileri.tarih);
-
-        fprintf(urunStokVeriGirisiDosyasi, "%d %d %d %.2f %d\n", tedarikciNo, urunKodu, alisMiktari, alisFiyati, tarih);
+        scanf("%d", &tarih);
+        fprintf(urunStokVeriGirisiDosyasi, "%d %d %d %f %d\n", tedarikciNo, urunKodu, alisMiktari, alisFiyati, tarih);
     }
     fclose(urunStokVeriGirisiDosyasi);
 }
 
-void urunStokBilgiGuncelleme(FILE *urunStokVeriGirisiDosyasi){
-    int tedarikciNo, urunKodu, alisMiktari, tarih, alisFiyati;
+void urunStokBilgiArama(FILE *urunStokVeriGirisiDosyasi){
+    int tedarikciNo, urunKodu, alisMiktari, tarih, siraSayisi, arananTedarikciNo;
+    float alisFiyati;
+    char karakterSayaci;;
+
+    scanf("%d", &arananTedarikciNo);
+
     urunStokVeriGirisiDosyasi = fopen("urunStokVeriGirisiDosyasi.txt", "r");
 
-    if(urunStokVeriGirisiDosyasi == NULL){
-        perror("Dosya bulunamadi.");
-        exit(1);
-    }
+    dosyaVarligi(urunStokVeriGirisiDosyasi);
 
-    for(int i = 0; i < 2; i++){
-        fscanf(urunStokVeriGirisiDosyasi, "%d %d %d %.2f %d", &tedarikciNo, &urunKodu, &alisMiktari, &alisFiyati, &tarih);
+    while((karakterSayaci = fgetc(urunStokVeriGirisiDosyasi)) != EOF){
+        if (karakterSayaci == '\n'){
+            siraSayisi++;
+        }
+    }
+    dosyaIcerikKontrolu(urunStokVeriGirisiDosyasi);
+
+    for(int i = 0; i < siraSayisi; i++){
+        fscanf(urunStokVeriGirisiDosyasi, "%d %d %d %f %d\n", &tedarikciNo, &urunKodu, &alisMiktari, &alisFiyati, &tarih);
+
+        if (arananTedarikciNo == tedarikciNo){
+            printf("Aranan veri bulundu.\n\n");
+            printf("%d. Kayit\n", i+1);
+            printf("---------\n");
+            printf("Tedarikci No: %d\n", tedarikciNo);
+            printf("Urun Kodu: %d\n", urunKodu);
+            printf("Alis Miktari: %d\n", alisMiktari);
+            printf("Alis Fiyati: %f\n", alisFiyati);
+            printf("Tarih: %d\n\n", tarih);
+            break;
+        }
+    }
+    if (arananTedarikciNo != tedarikciNo){
+        puts("Aranan veri bulunamadi.");
+        exit(EXIT_SUCCESS);
+    }
+}
+
+void urunStokBilgiSilme(FILE *urunStokVeriGirisiDosyasi){
+    FILE *urunStokGeciciDosyasi;
+    char kategori[MAX], dosyalarArasiBaglanti[MAX];
+    int tedarikciNo, urunKodu, alisMiktari, tarih, siraSayisi = 0, silinecekKayitNo = 0;
+    char karakterSayaci;
+    float alisFiyati;
+
+    urunStokVeriGirisiDosyasi = fopen("urunStokVeriGirisiDosyasi.txt", "r");
+    urunStokGeciciDosyasi = fopen("urunStokGeciciDosyasisi.txt", "w");
+
+    dosyaVarligi(urunStokVeriGirisiDosyasi);
+
+    while((karakterSayaci = fgetc(urunStokVeriGirisiDosyasi)) != EOF){
+        if (karakterSayaci == '\n'){
+            siraSayisi++;
+        }
+    }
+    dosyaIcerikKontrolu(urunStokVeriGirisiDosyasi);
+
+    for(int i = 0; i < siraSayisi; i++){
+        fscanf(urunStokVeriGirisiDosyasi, "%d %d %d %f %d\n", &tedarikciNo, &urunKodu, &alisMiktari, &alisFiyati, &tarih);
         
         printf("%d. Kayit\n", i+1);
         printf("---------\n");
         printf("Tedarikci No: %d\n", tedarikciNo);
         printf("Urun Kodu: %d\n", urunKodu);
         printf("Alis Miktari: %d\n", alisMiktari);
-        printf("Alis Fiyati: %.2f\n", alisFiyati);
+        printf("Alis Fiyati: %f\n", alisFiyati);
         printf("Tarih: %d\n\n", tarih);
     }
+
+    printf("%s", silmeMetni);
+    scanf("%d", &silinecekKayitNo);
+
+    bool devamEt = true;
+    int anlikSira = 1;
+    do
+    {
+        fgets(dosyalarArasiBaglanti, MAX, urunStokVeriGirisiDosyasi);
+        if(feof(urunStokVeriGirisiDosyasi))
+            devamEt == false;
+        else if (anlikSira != silinecekKayitNo)
+            fputs(dosyalarArasiBaglanti, urunStokGeciciDosyasi);
+        anlikSira++;
+
+    } while (devamEt);
+    
     fclose(urunStokVeriGirisiDosyasi);
+    fclose(urunStokGeciciDosyasi);
+
+    remove("urunStokVeriGirisiDosyasi.txt");
+    rename("urunStokGeciciDosyasi.txt", "urunStokVeriGirisiDosyasi.txt");
+}
+
+void urunStokBilgiGuncelleme(FILE *urunStokVeriGirisiDosyasi){
+    FILE *urunStokGeciciDosyasi;
+    int tedarikciNo, urunKodu, alisMiktari, tarih, siraSayisi;
+    float alisFiyati;
+    char karakterSayaci, degisecekKelime[MAX], yeniKelime[MAX], okunanKelime[MAX];
+
+    urunStokVeriGirisiDosyasi = fopen("urunStokVeriGirisiDosyasi.txt", "r");
+    urunStokGeciciDosyasi = fopen("urunStokGeciciDosyasisi.txt", "w");
+
+    dosyaVarligi(urunStokVeriGirisiDosyasi);
+
+    while((karakterSayaci = fgetc(urunStokVeriGirisiDosyasi)) != EOF){
+        if (karakterSayaci == '\n'){
+            siraSayisi++;
+        }
+    }
+    dosyaIcerikKontrolu(urunStokVeriGirisiDosyasi);
+
+    for(int i = 0; i < siraSayisi; i++){
+        fscanf(urunStokVeriGirisiDosyasi, "%d %d %d %f %d\n", &tedarikciNo, &urunKodu, &alisMiktari, &alisFiyati, &tarih);
+        
+        printf("%d. Kayit\n", i+1);
+        printf("---------\n");
+        printf("Tedarikci No: %d\n", tedarikciNo);
+        printf("Urun Kodu: %d\n", urunKodu);
+        printf("Alis Miktari: %d\n", alisMiktari);
+        printf("Alis Fiyati: %f\n", alisFiyati);
+        printf("Tarih: %d\n\n", tarih);
+    }
+
+    puts("Kayitlar siralanmistir.\nGuncellemek istediginiz veriyi yaziniz.\n");
+    scanf("%s", degisecekKelime);
+    degisecekKelime[strlen(degisecekKelime) - 1] = degisecekKelime[strlen(degisecekKelime)];
+
+    puts("\nYerini alacak veriyi yaziniz:\n");
+    scanf("%s", yeniKelime);
+    yeniKelime[strlen(yeniKelime) - 1] = yeniKelime[strlen(yeniKelime)]; //yeni satırı siler
+
+    rewind(urunStokVeriGirisiDosyasi);
+    while(!feof(urunStokVeriGirisiDosyasi)){
+        fscanf(urunStokVeriGirisiDosyasi, "%s", okunanKelime);
+
+        if(strcmp(okunanKelime, degisecekKelime) == 0)
+            strcpy(okunanKelime, yeniKelime);
+        fprintf(urunStokGeciciDosyasi, "%s", okunanKelime);
+    }
+
+    fclose(urunStokVeriGirisiDosyasi);
+    fclose(urunStokGeciciDosyasi);
+
+    remove("urunStokVeriGirisiDosyasi.txt");
+    rename("urunStokGeciciDosyasi.txt", "urunStokVeriGirisiDosyasi.txt");
+
 }
 
 void dosyaIcerikKontrolu(FILE *girisDosyasi){
@@ -465,8 +700,8 @@ void dosyaIcerikKontrolu(FILE *girisDosyasi){
     }
 }
 
-void dosyaVarligi(FILE *urunVeriGirisiDosyasi){
-    if(urunVeriGirisiDosyasi == NULL){
+void dosyaVarligi(FILE *VeriGirisiDosyasi){
+    if(VeriGirisiDosyasi == NULL){
         printf("Dosya bulunamadi.");
         exit(EXIT_SUCCESS);
     }
