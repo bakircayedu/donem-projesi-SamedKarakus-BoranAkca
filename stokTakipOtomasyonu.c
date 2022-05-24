@@ -36,7 +36,7 @@ enum urunStokIslemleri{
 }urunStokSecenegi;
 
 typedef struct{
-    const char kategori[MAX];          //Sabit
+    const char kategori[MAX];
     int urunKodu;
     char urunAdi[MAX];
     float urunSatisFiyati;
@@ -47,7 +47,7 @@ typedef struct{
     int tedarikciNo;
     char tedarikciAdi[MAX];
     char adres[MAX];
-    const char sehir[MAX];         //Sabit
+    const char sehir[MAX];
 } tedarikci;
 
 typedef struct{
