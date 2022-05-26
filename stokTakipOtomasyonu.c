@@ -293,7 +293,7 @@ void urunBilgiGuncelleme(FILE *urunVeriGirisiDosyasi){
 
     puts("\nYerini alacak veriyi yaziniz:\n");
     scanf("%s", yeniKelime);
-    yeniKelime[strlen(yeniKelime) - 1] = yeniKelime[strlen(yeniKelime)]; //yeni satırı siler
+    yeniKelime[strlen(yeniKelime) - 1] = yeniKelime[strlen(yeniKelime)];
 
     rewind(urunVeriGirisiDosyasi);
     while(!feof(urunVeriGirisiDosyasi)){
@@ -667,7 +667,7 @@ void urunStokBilgiGuncelleme(FILE *urunStokVeriGirisiDosyasi){
 
     puts("\nYerini alacak veriyi yaziniz:\n");
     scanf("%s", yeniKelime);
-    yeniKelime[strlen(yeniKelime) - 1] = yeniKelime[strlen(yeniKelime)]; //yeni satırı siler
+    yeniKelime[strlen(yeniKelime) - 1] = yeniKelime[strlen(yeniKelime)];
 
     rewind(urunStokVeriGirisiDosyasi);
     while(!feof(urunStokVeriGirisiDosyasi)){
